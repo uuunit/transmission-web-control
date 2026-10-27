@@ -1108,7 +1108,7 @@ var system = {
 						var ids = [];
 						for (var i = 0; i < rs.length; i++) ids.push(rs[i].id);
 						if (!ids.length) return;
-						transmission.setTorrentGroup(ids, "", function(result) {
+						transmission.setTorrentAdvanced(ids, {group: ""}, function(result) {
 							if (result == "success") system.control.torrentlist.datagrid("reload");
 						});
 					}
@@ -1124,7 +1124,7 @@ var system = {
 								var ids = [];
 								for (var i = 0; i < rs.length; i++) ids.push(rs[i].id);
 								if (!ids.length) return;
-								transmission.setTorrentGroup(ids, gname, function(result) {
+								transmission.setTorrentAdvanced(ids, {group: gname}, function(result) {
 									if (result == "success") system.control.torrentlist.datagrid("reload");
 								});
 							}
