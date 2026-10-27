@@ -303,7 +303,14 @@
 			"selected": "已選擇："
 		},
 		"server-labels": {
-			"prompt": "標籤（多個用逗號分隔，留空則清除）："
+			"prompt": "標籤（多個用逗號分隔，留空則清除）：",
+			"title": "伺服器標籤",
+			"new-label": "新標籤：",
+			"selected": "已選標籤",
+			"suggestions": "可選標籤（點擊切換）",
+			"empty": "（無，將清除所有標籤）",
+			"no-suggestions": "（暫無已用標籤，請在上方輸入）",
+			"count": "已選 %s 個"
 		}
 	},
 	"torrent": {

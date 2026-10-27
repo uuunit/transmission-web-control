@@ -1112,48 +1112,178 @@ var system = {
 		});
 	},
 	/**
+	 * Initialise the server-label editor dialog.
+	 *
+	 * easyui injects dialog content through innerHTML, so any inline <script>
+	 * in the template never runs. The whole controller therefore lives here,
+	 * and editServerLabels() calls this once the markup is in the DOM.
+	 */
+	initServerLabelsDialog: function($dlg, rows) {
+		if (!$dlg || !$dlg.length) return;
+		if ($dlg.data("sl-initialised")) return;
+		$dlg.data("sl-initialised", true);
+
+		var dlg = system.lang.dialog["server-labels"] || {};
+		var state = { selected: {}, suggestions: [], rows: rows || [] };
+
+		// Pre-select the union of the selected torrents' labels
+		for (var i = 0; i < state.rows.length; i++) {
+			var lbs = state.rows[i].labels || [];
+			for (var j = 0; j < lbs.length; j++) {
+				state.selected[lbs[j]] = true;
+			}
+		}
+
+		// Suggestions: every label in use across the session
+		var seen = {};
+		if (transmission.serverLabels && typeof transmission.serverLabels === "object") {
+			state.suggestions = Object.keys(transmission.serverLabels);
+		} else {
+			for (var k in transmission.torrents.all) {
+				var lb = transmission.torrents.all[k].labels || [];
+				for (var m = 0; m < lb.length; m++) {
+					if (!seen[lb[m]]) { seen[lb[m]] = 1; state.suggestions.push(lb[m]); }
+				}
+			}
+		}
+		state.suggestions.sort();
+
+		function makeChip(name, active) {
+			var el = $("<a href='javascript:void(0);' class='user-label-big'/>").html(name);
+			el.css({
+				"display": "inline-block", "padding": "2px 10px", "margin": "2px",
+				"border-radius": "12px", "cursor": "pointer", "font-size": "12px"
+			}).css(active
+				? { "background-color": "#3b82f6", "color": "#fff", "border": "1px solid #2563eb" }
+				: { "background-color": "#f1f5f9", "color": "#475569", "border": "1px solid #cbd5e1" });
+			el.click(function() {
+				if (state.selected[name]) {
+					delete state.selected[name];
+				} else {
+					state.selected[name] = true;
+				}
+				renderSelected(); renderSuggestions(); renderCount();
+			});
+			return el;
+		}
+
+		function renderSelected() {
+			var box = $dlg.find("#server-label-selected").empty();
+			var names = Object.keys(state.selected).sort();
+			if (!names.length) {
+				box.html("<span style='color:#999;font-style:italic;'>" + (dlg["empty"] || "-") + "</span>");
+				return;
+			}
+			for (var i = 0; i < names.length; i++) {
+				makeChip(names[i], true).appendTo(box);
+			}
+		}
+
+		function renderSuggestions() {
+			var box = $dlg.find("#server-label-suggestions").empty();
+			if (!state.suggestions.length) {
+				box.html("<span style='color:#999;font-style:italic;'>" + (dlg["no-suggestions"] || "-") + "</span>");
+				return;
+			}
+			for (var i = 0; i < state.suggestions.length; i++) {
+				var n = state.suggestions[i];
+				makeChip(n, !!state.selected[n]).appendTo(box);
+			}
+		}
+
+		function renderCount() {
+			var tpl = dlg["count"] || "%s selected";
+			$dlg.find("#server-label-count").text(tpl.replace("%s", Object.keys(state.selected).length));
+		}
+
+		function addFromInput() {
+			var $input = $dlg.find("#server-label-new");
+			var v = ($input.textbox("getValue") || "").replace(/^\s+|\s+$/g, "");
+			if (!v) return;
+			state.selected[v] = true;
+			if (state.suggestions.indexOf(v) == -1) {
+				state.suggestions.push(v);
+				state.suggestions.sort();
+			}
+			$input.textbox("setValue", "");
+			renderSelected(); renderSuggestions(); renderCount();
+		}
+
+		function save() {
+			var labels = Object.keys(state.selected).sort();
+			var ids = [];
+			for (var i = 0; i < state.rows.length; i++) ids.push(state.rows[i].id);
+			transmission.setTorrentLabels(ids, labels, function(result) {
+				if (result == "success") {
+					setTimeout(function() { system.control.torrentlist.refresh(); }, 300);
+				} else {
+					system.showStatus((system.lang.error && system.lang.error["set-error"]) || ("Error: " + result));
+				}
+			});
+		}
+
+		function closeDialog() {
+			var source = $dlg.data("popoverSource");
+			if (source) {
+				$(source).webuiPopover("hide");
+			} else {
+				$dlg.dialog("close");
+			}
+		}
+
+		system.resetLangText($dlg);
+
+		// easyui's parser may already have converted these anchors into
+		// linkbuttons, which overwrites their text. Set it explicitly.
+		var P = system.lang.dialog["public"] || {};
+		$dlg.find("#server-label-add").linkbutton({ text: P["button-addnew"] || "" });
+		$dlg.find("#server-label-button-ok").linkbutton({ text: P["button-ok"] || "OK" });
+		$dlg.find("#server-label-button-cancel").linkbutton({ text: P["button-cancel"] || "Cancel" });
+
+		$dlg.find("#server-label-button-cancel").click(closeDialog);
+		$dlg.find("#server-label-button-ok").click(function() { save(); closeDialog(); });
+		$dlg.find("#server-label-add").click(addFromInput);
+		$dlg.find("#server-label-new").textbox("textbox").keydown(function(e) {
+			if (e.keyCode == 13) { addFromInput(); e.preventDefault(); }
+		});
+
+		renderSelected();
+		renderSuggestions();
+		renderCount();
+	},
+	/**
 	 * Edit server-side labels for the given torrent rows.
-	 * Uses the union of their current labels as the starting value.
+	 * Opens a graphical editor pre-filled with the union of their labels
+	 * (Transmission 4.0+; the labels live on the daemon).
 	 */
 	editServerLabels: function(rows) {
 		if (!rows || !rows.length) return;
 
-		var current = [];
-		var seen = {};
-		for (var i = 0; i < rows.length; i++) {
-			var lbs = rows[i].labels || [];
-			for (var j = 0; j < lbs.length; j++) {
-				if (!seen[lbs[j]]) { seen[lbs[j]] = 1; current.push(lbs[j]); }
-			}
-		}
-
-		var input = window.prompt(
-			(system.lang.dialog && system.lang.dialog["server-labels"] &&
-			 system.lang.dialog["server-labels"].prompt) ||
-			"标签（多个用逗号分隔，留空则清除）：",
-			current.join(", ")
-		);
-		if (input === null) return;   // cancelled
-
-		var labels = [];
-		var parts = input.split(",");
-		for (var k = 0; k < parts.length; k++) {
-			var name = parts[k].replace(/^\s+|\s+$/g, "");
-			if (name && labels.indexOf(name) == -1) labels.push(name);
-		}
-
-		var ids = [];
-		for (var m = 0; m < rows.length; m++) ids.push(rows[m].id);
-
-		transmission.setTorrentLabels(ids, labels, function(result) {
-			if (result == "success") {
-				setTimeout(function() {
-					system.control.torrentlist.refresh();
-				}, 300);
-			} else {
-				system.showStatus(system.lang.error["set-error"] || "Error: " + result);
+		var dlg = system.lang.dialog["server-labels"] || {};
+		system.openDialogFromTemplate({
+			id: "dialog-server-labels",
+			options: {
+				title: dlg.title || "Server Labels",
+				width: 600,
+				height: 420
+			},
+			datas: {
+				"rows": rows
 			}
 		});
+
+		// The template is fetched asynchronously; poll briefly until its markup
+		// is in the DOM, then wire up the controller.
+		var attempts = 0;
+		var timer = setInterval(function() {
+			var $dlg = $("#dialog-server-labels");
+			if ($dlg.find("#server-label-selected").length) {
+				clearInterval(timer);
+				system.initServerLabelsDialog($dlg, rows);
+			} else if (++attempts > 40) {
+				clearInterval(timer);
+			}
+		}, 100);
 	},
 	/**
 	 * 格式化指定种子的标签

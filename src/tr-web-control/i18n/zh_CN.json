@@ -318,7 +318,14 @@
 			"invalid-file": "无效的配置文件"
 		},
 		"server-labels": {
-			"prompt": "标签（多个用逗号分隔，留空则清除）："
+			"prompt": "标签（多个用逗号分隔，留空则清除）：",
+			"title": "服务端标签",
+			"new-label": "新标签：",
+			"selected": "已选标签",
+			"suggestions": "可选标签（点击切换）",
+			"empty": "（无，将清除所有标签）",
+			"no-suggestions": "（暂无已用标签，请在上方输入）",
+			"count": "已选 %s 个"
 		}
 	},
 	"torrent": {

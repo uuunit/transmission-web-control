@@ -317,7 +317,14 @@
 			"invalid-file": "Неправильний файл"
 		},
 		"server-labels": {
-			"prompt": "Labels (comma separated, leave empty to clear):"
+			"prompt": "Labels (comma separated, leave empty to clear):",
+			"title": "Server Labels",
+			"new-label": "New label:",
+			"selected": "Selected",
+			"suggestions": "Available labels (click to toggle)",
+			"empty": "(none — will clear all labels)",
+			"no-suggestions": "(no labels in use yet, type one above)",
+			"count": "%s selected"
 		}
 	},
 	"torrent": {
