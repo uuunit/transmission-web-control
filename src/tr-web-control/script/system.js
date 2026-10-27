@@ -1,8 +1,8 @@
 // Current system global object
 var system = {
-	version: "1.6.1",
+	version: "1.7.0",
 	rootPath: "tr-web-control/",
-	codeupdate: "20200913",
+	codeupdate: "20261027",
 	configHead: "transmission-web-control",
 	// default config, can be customized in config.js
 	config: {
@@ -42,7 +42,10 @@ var system = {
 			servers: true,
 			folders: true,
 			statistics: true,
-			labels: false
+			labels: false,
+			// Server-side labels (Transmission 4.0+, stored on the daemon and
+			// shared across clients). Shown by default when the daemon supports it.
+			serverLabels: true
 		},
 		labels: [],
 		labelMaps: {},
@@ -622,6 +625,11 @@ var system = {
 				id: "labels",
 				text: this.lang.tree.labels,
 				iconCls: "iconfont tr-icon-labels"
+			},
+			"serverLabels": {
+				id: "serverLabels",
+				text: this.lang.tree.serverLabels,
+				iconCls: "iconfont tr-icon-label"
 			}
 		}
 
@@ -943,6 +951,14 @@ var system = {
 					menus.push("-");
 					menus.push("setLabels");
 				}
+				// Transmission 4.x (RPC 17+): server-side labels & sequential download
+				if (transmission.supports("labels")) {
+					menus.push("-");
+					menus.push("serverLabels");
+				}
+				if (transmission.supports("sequentialDownload")) {
+					menus.push("sequentialDownload");
+				}
 				var toolbar = this.panel.toolbar;
 				for (var item in menus) {
 					var key = menus[item];
@@ -1048,7 +1064,96 @@ var system = {
 						});
 					}
 				}
+			case "serverLabels":
+				// Server-side labels (Transmission 4.0+). Stored on the daemon,
+				// so they follow the torrent to every client, unlike the local
+				// labels above which live in this browser's localStorage.
+				return {
+					id: "serverLabels",
+					text: system.lang.menus.serverLabels,
+					iconCls: "iconfont tr-icon-label",
+					disabled: this.checkedRows.length == 0,
+					onclick: function() {
+						system.editServerLabels(system.checkedRows);
+					}
+				};
+			case "sequentialDownload":
+				var rows = this.checkedRows || [];
+				var allOn = rows.length > 0;
+				for (var i = 0; i < rows.length; i++) {
+					if (!rows[i].sequential_download) { allOn = false; break; }
+				}
+				return {
+					id: "sequentialDownload",
+					text: allOn ? system.lang.menus.sequentialOff : system.lang.menus.sequentialOn,
+					disabled: rows.length == 0,
+					onclick: function() {
+						system.setSequentialDownload(rows, !allOn);
+					}
+				};
 		}
+	},
+	/**
+	 * Toggle sequential download on the given torrent rows.
+	 */
+	setSequentialDownload: function(rows, enabled) {
+		if (!rows || !rows.length) return;
+		var ids = [];
+		for (var i = 0; i < rows.length; i++) ids.push(rows[i].id);
+		transmission.setSequentialDownload(ids, enabled, function(result) {
+			if (result == "success") {
+				// Give the daemon a moment, then refresh so the new state shows.
+				setTimeout(function() {
+					system.control.torrentlist.refresh();
+				}, 300);
+			} else {
+				system.showStatus(system.lang.error["set-error"] || "Error: " + result);
+			}
+		});
+	},
+	/**
+	 * Edit server-side labels for the given torrent rows.
+	 * Uses the union of their current labels as the starting value.
+	 */
+	editServerLabels: function(rows) {
+		if (!rows || !rows.length) return;
+
+		var current = [];
+		var seen = {};
+		for (var i = 0; i < rows.length; i++) {
+			var lbs = rows[i].labels || [];
+			for (var j = 0; j < lbs.length; j++) {
+				if (!seen[lbs[j]]) { seen[lbs[j]] = 1; current.push(lbs[j]); }
+			}
+		}
+
+		var input = window.prompt(
+			(system.lang.dialog && system.lang.dialog["server-labels"] &&
+			 system.lang.dialog["server-labels"].prompt) ||
+			"标签（多个用逗号分隔，留空则清除）：",
+			current.join(", ")
+		);
+		if (input === null) return;   // cancelled
+
+		var labels = [];
+		var parts = input.split(",");
+		for (var k = 0; k < parts.length; k++) {
+			var name = parts[k].replace(/^\s+|\s+$/g, "");
+			if (name && labels.indexOf(name) == -1) labels.push(name);
+		}
+
+		var ids = [];
+		for (var m = 0; m < rows.length; m++) ids.push(rows[m].id);
+
+		transmission.setTorrentLabels(ids, labels, function(result) {
+			if (result == "success") {
+				setTimeout(function() {
+					system.control.torrentlist.refresh();
+				}, 300);
+			} else {
+				system.showStatus(system.lang.error["set-error"] || "Error: " + result);
+			}
+		});
 	},
 	/**
 	 * 格式化指定种子的标签
@@ -1582,6 +1687,8 @@ var system = {
 	reloadSession: function (isinit) {
 		transmission.getSession(function (result) {
 			system.serverConfig = result;
+			// Expose session config on the RPC object so capability detection works
+			transmission.sessionConfig = result;
 			// Version Information
 			$("#status_version").html("Transmission " + system.lang.statusbar.version + result["version"] + ", RPC: " + result["rpc-version"] +
 				", WEB Control: " + system.version + "(" + system.codeupdate + ")");
@@ -1665,6 +1772,7 @@ var system = {
 		this.resetNavStatistics();
 		this.resetNavFolders(oldInfos);
 		this.resetNavLabels();
+		this.resetNavServerLabels();
 
 		// FF browser displays the total size, will be moved down a row, so a separate treatment
 		// 新版本已无此问题
@@ -1965,6 +2073,65 @@ var system = {
 			}
 		}
 	},
+	/**
+	 * Server-side labels (Transmission 4.0+ / RPC 17+).
+	 * Unlike the local labels above (stored in this browser's localStorage),
+	 * these live on the daemon and are shared across every client.
+	 * Nodes are aggregated from the already-fetched torrent list, so no extra
+	 * RPC round-trip is needed.
+	 */
+	resetNavServerLabels: function (clear) {
+		var root = this.panel.left.tree("find", "serverLabels");
+
+		// Hide the group entirely when the daemon predates Transmission 4.0
+		// or the user switched it off.
+		if (!this.config.nav.serverLabels || !transmission.supports("labels")) {
+			if (root) {
+				this.panel.left.tree("remove", root.target);
+			}
+			return;
+		}
+
+		if (clear && root) {
+			var items = this.panel.left.tree("getChildren", root.target);
+			for (var index = 0; index < items.length; index++) {
+				this.panel.left.tree("remove", items[index].target);
+			}
+		}
+
+		// Aggregate label -> torrent count from the current dataset
+		var counts = {};
+		for (var id in transmission.torrents.all) {
+			var item = transmission.torrents.all[id];
+			if (!item || !item.labels || !item.labels.length) continue;
+			for (var i = 0; i < item.labels.length; i++) {
+				var name = item.labels[i];
+				if (!name) continue;
+				counts[name] = (counts[name] || 0) + 1;
+			}
+		}
+		transmission.serverLabels = counts;
+
+		var prefix = "serverlabel-";
+		var names = [];
+		for (var name in counts) {
+			names.push(name);
+		}
+		names.sort();
+
+		for (var n = 0; n < names.length; n++) {
+			var labelName = names[n];
+			var nodeKey = prefix + this.getValidTreeKey(labelName);
+			if (!this.panel.left.tree("find", nodeKey)) {
+				this.appendTreeNode("serverLabels", [{
+					id: nodeKey,
+					text: labelName,
+					labelName: labelName,
+					iconCls: "iconfont tr-icon-label"
+				}]);
+			}
+		}
+	},
 	// Displays the current torrent count and size
 	showNodeMoreInfos: function (count, size) {
 		var result = "";
@@ -2167,6 +2334,18 @@ var system = {
 											torrents.push(element);
 										}
 									}
+								}
+							}
+						} else if (config.node.id.indexOf("serverlabel-") != -1) {
+							// Server-side labels (Transmission 4.0+).
+							// NOTE: this branch must stay ABOVE the "label-" branch,
+							// because "serverlabel-..." also contains the substring "label-".
+							var serverLabelName = config.node.labelName;
+							torrents = [];
+							for (var skey in transmission.torrents.all) {
+								var sitem = transmission.torrents.all[skey];
+								if (sitem && sitem.labels && $.inArray(serverLabelName, sitem.labels) != -1) {
+									torrents.push(sitem);
 								}
 							}
 						} else if (config.node.id.indexOf("label-") != -1) {
@@ -2893,6 +3072,21 @@ var system = {
 		//console.log("datas:",datas);
 		//system.panel.attribute.find("#torrent-peers-table").datagrid({loadFilter:pagerFilter,pageNumber:1}).datagrid("loadData",datas);
 	},
+	/**
+	 * Render Transmission 4.x server-side labels inside the detail panel.
+	 */
+	renderAttributeLabels: function (labels) {
+		var box = system.panel.attribute.find("#torrent-attribute-value-labels");
+		if (!box.length) return;
+		box.empty();
+		if (!labels || !labels.length) {
+			box.html("<span class='text-nochange'>-</span>");
+			return;
+		}
+		for (var i = 0; i < labels.length; i++) {
+			$("<span class='user-label'/>").html(labels[i]).appendTo(box);
+		}
+	},
 	// Fill torrent parameters
 	fillTorrentConfig: function (torrent) {
 		if (system.panel.attribute.find("#torrent-attribute-tabs").data("selectedIndex") != 4) {
@@ -2920,6 +3114,7 @@ var system = {
 						useTag = true;
 					case "downloadLimited":
 					case "uploadLimited":
+					case "sequential_download":
 						if (value == true || value == 1) {
 							checked = true;
 						}
@@ -2930,6 +3125,25 @@ var system = {
 						}
 						system.panel.attribute.find("#" + key).prop("checked", checked);
 
+						break;
+
+					// Transmission 4.x: these need dedicated renderers because
+					// they are arrays / booleans rather than plain input values.
+					case "labels":
+						system.renderAttributeLabels(value);
+						break;
+
+					case "isPrivate":
+						system.panel.attribute.find("#torrent-attribute-value-isPrivate").html(
+							value ? (system.lang.torrent.attribute.label["is-private-yes"] || "Yes")
+							      : (system.lang.torrent.attribute.label["is-private-no"] || "No")
+						);
+						break;
+
+					case "group":
+						system.panel.attribute.find("#torrent-attribute-value-group").html(
+							value || "-"
+						);
 						break;
 
 					default:

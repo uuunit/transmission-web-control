@@ -86,7 +86,10 @@
 			"auto-match-data-folder": "自动匹配数据目录"
 		},
 		"setLabels": "设置用户标签",
-		"copyMagnetLink": "复制磁力链接到剪切板"
+		"copyMagnetLink": "复制磁力链接到剪切板",
+		"serverLabels": "服务端标签…",
+		"sequentialOn": "开启顺序下载",
+		"sequentialOff": "关闭顺序下载"
 	},
 	"title": {
 		"left": "导航",
@@ -126,7 +129,8 @@
 				"folders": "数据目录"
 			}
 		},
-		"labels": "用户标签"
+		"labels": "用户标签",
+		"serverLabels": "服务端标签"
 	},
 	"statusbar": {
 		"downloadspeed": "下载速度：",
@@ -136,7 +140,7 @@
 	"dialog": {
 		"torrent-add": {
 			"download-dir": "保存目录：",
-		    "used-download-dir": "常用目录：",
+			"used-download-dir": "常用目录：",
 			"torrent-url": "种子地址：",
 			"tip-torrent-url": "注：复制种子链接到列表中，多个种子用“回车”分隔。",
 			"autostart": "自动开始：",
@@ -312,6 +316,9 @@
 		"import-config": {
 			"title": "请选择需要导入的配置",
 			"invalid-file": "无效的配置文件"
+		},
+		"server-labels": {
+			"prompt": "标签（多个用逗号分隔，留空则清除）："
 		}
 	},
 	"torrent": {
@@ -430,7 +437,13 @@
 				"seedRatioMode": "当种子的分享率达到这个数时，自动停止做种：",
 				"seedIdleMode": "当种子超过这个时间没有流量时，自动停止做种：",
 				"doneDate": "完成时间：",
-				"seedTime": "做种时间："
+				"seedTime": "做种时间：",
+				"labels": "服务端标签",
+				"sequential": "顺序下载",
+				"maxConnectedPeers": "最大连接数",
+				"group": "限速组",
+				"is-private-yes": "是（私有）",
+				"is-private-no": "否（公开）"
 			},
 			"tip": {
 				"button-allow": "下载已选择的文件",

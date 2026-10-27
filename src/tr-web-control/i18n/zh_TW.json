@@ -86,7 +86,10 @@
 			"auto-match-data-folder": "自動配對資料夾"
 		},
 		"setLabels": "設定使用者標籤",
-		"copyMagnetLink": "複製磁力連結至剪貼簿"
+		"copyMagnetLink": "複製磁力連結至剪貼簿",
+		"serverLabels": "伺服器標籤…",
+		"sequentialOn": "開啟順序下載",
+		"sequentialOff": "關閉順序下載"
 	},
 	"title": {
 		"left": "分類資料夾",
@@ -126,7 +129,8 @@
 				"folders": "資料夾"
 			}
 		},
-		"labels": "使用者標籤"
+		"labels": "使用者標籤",
+		"serverLabels": "伺服器標籤"
 	},
 	"statusbar": {
 		"downloadspeed": "下載速度：",
@@ -136,7 +140,7 @@
 	"dialog": {
 		"torrent-add": {
 			"download-dir": "下載資料夾：",
-            "used-download-dir": "常用資料夾：",
+			"used-download-dir": "常用資料夾：",
 			"torrent-url": "磁力連結：",
 			"tip-torrent-url": "註：貼上磁力連結，多個磁力連結用「換行」分隔。",
 			"autostart": "自動開始：",
@@ -297,6 +301,9 @@
 			"title": "設定使用者標籤",
 			"available": "可用標籤：",
 			"selected": "已選擇："
+		},
+		"server-labels": {
+			"prompt": "標籤（多個用逗號分隔，留空則清除）："
 		}
 	},
 	"torrent": {
@@ -415,7 +422,13 @@
 				"seedRatioMode": "當種子的分享率達到這個數時，自動停止做種：",
 				"seedIdleMode": "當種子超過這個時間沒有流量時，自動停止做種：",
 				"doneDate": "完成時間：",
-				"seedTime": "做種時間："
+				"seedTime": "做種時間：",
+				"labels": "伺服器標籤",
+				"sequential": "順序下載",
+				"maxConnectedPeers": "最大連線數",
+				"group": "限速組",
+				"is-private-yes": "是（私有）",
+				"is-private-no": "否（公開）"
 			},
 			"tip": {
 				"button-allow": "下載已選取的檔案",

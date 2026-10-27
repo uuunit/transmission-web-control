@@ -85,7 +85,10 @@
 		"plugin": {
 			"auto-match-data-folder": "Automatically matches data directory"
 		},
-		"setLabels": "Etikett auswählen"
+		"setLabels": "Etikett auswählen",
+		"serverLabels": "Server Labels…",
+		"sequentialOn": "Enable Sequential Download",
+		"sequentialOff": "Disable Sequential Download"
 	},
 	"title": {
 		"left": "Navigation",
@@ -125,7 +128,8 @@
 				"folders": "Ordner"
 			}
 		},
-		"labels": "Etiketten"
+		"labels": "Etiketten",
+		"serverLabels": "Server Labels"
 	},
 	"statusbar": {
 		"downloadspeed": "Download speed:",
@@ -308,6 +312,9 @@
 		"import-config": {
 			"title": "Importdatei auswählen",
 			"invalid-file": "Dateifehler"
+		},
+		"server-labels": {
+			"prompt": "Labels (comma separated, leave empty to clear):"
 		}
 	},
 	"torrent": {
@@ -410,7 +417,13 @@
 				"seedRatioMode": "Seed ratio für diesen Torrent:",
 				"seedIdleMode": "Seedender Torrent wird gestoppt, wenn er Inaktiv ist für:",
 				"doneDate": "Beendet am:",
-				"seedTime": "Seed Time:"
+				"seedTime": "Seed Time:",
+				"labels": "Server Labels",
+				"sequential": "Sequential",
+				"maxConnectedPeers": "Max Peers",
+				"group": "Speed Group",
+				"is-private-yes": "Yes (private)",
+				"is-private-no": "No (public)"
 			},
 			"tip": {
 				"button-allow": "Gewählte Datei(en) erunterladen",

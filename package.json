@@ -1,0 +1,23 @@
+{
+  "name": "transmission-web-control",
+  "version": "1.7.0",
+  "description": "Transmission Web Control - maintained fork. Original by ronggang (栽培者), archived 2025-06. This fork adds Transmission 4.x / RPC 19 support.",
+  "main": "build.js",
+  "scripts": {
+    "build": "node build.js",
+    "build:check": "node build.js --check"
+  },
+  "keywords": [
+    "transmission",
+    "webui",
+    "bittorrent",
+    "pt"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "terser": "^5.44.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

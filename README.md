@@ -1,28 +1,89 @@
-
 <p align="center">
 <img src="https://github.com/ronggang/transmission-web-control/raw/master/src/tr-web-control/logo.png"><br/>
-<a href="https://github.com/ronggang/transmission-web-control/releases" title="GitHub Releases"><img src="https://img.shields.io/github/release/ronggang/transmission-web-control.svg"></a>
-<img src="https://img.shields.io/badge/transmission-%3E=2.40%20(RPC%20%3E14)-green.svg" title="Support Transmission Version">
-<a href="https://www.transifex.com/ronggang/transmission-web-control" title="Translation Status"><img src="https://img.shields.io/badge/dynamic/json.svg?label=translated&url=http%3A%2F%2Ftwc-translation-status.jimufans.com&query=%24.status&colorB=1081c2&suffix=%25"></a>
-<a href="https://github.com/ronggang/transmission-web-control/LICENSE" title="GitHub license"><img src="https://img.shields.io/github/license/ronggang/transmission-web-control.svg"></a>
+<img src="https://img.shields.io/badge/transmission-%3E%3D2.40%20(RPC%20%3E14)-green.svg" title="Support Transmission Version">
+<img src="https://img.shields.io/badge/fork-Transmission%204.x%20%2F%20RPC%2019-blue.svg" title="Fork focus">
+<a href="LICENSE" title="license"><img src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
 </p>
 
 ----
-## [English Introduction](https://github.com/ronggang/transmission-web-control/wiki)
 
-## 关于
-本项目主要目的是想加强[Transmission](https://www.transmissionbt.com/) Web的操作能力，本项目原本在[Google Code](https://code.google.com/p/transmission-control/)托管，现迁移至GitHub。
-本项目设计之初仅针对PT站，因此增加了 Tracker 服务器分组及状态，但这不并适用于普通BT种子。
+# Transmission Web Control — maintained fork
 
-另外，本项目仅为一套自定义的WebUI，不能代替 Transmission 工作，用户需要自行安装 Transmission 后才可正常使，Transmission 安装方法请移步至官网：https://www.transmissionbt.com/
+This is a **maintained fork** of [ronggang/transmission-web-control](https://github.com/ronggang/transmission-web-control)
+(the original "Transmission Web Control" / TWC by 栽培者), which was **archived on 2025-06-01**.
 
-## 界面预览
-![screenshots](https://user-images.githubusercontent.com/8065899/38598199-0d2e684c-3d8e-11e8-8b21-3cd1f3c7580a.png)
+The upstream project served PT users well for years, but its final release (v1.6.1, 2020-09)
+predates Transmission 4.x. This fork keeps the UI and workflow people are used to, and brings
+it up to date with the modern RPC API.
 
-## 安装方法及更多内容，请参考：[中文帮助](https://github.com/ronggang/transmission-web-control/wiki/Home-CN) 
+## What this fork adds
 
-## 更新日志 [查看](https://github.com/ronggang/transmission-web-control/blob/master/CHANGELOG.md)
+**Transmission 4.x / RPC 17+ support**
 
-## 项目日常维护
-* 栽培者
-* DarkAlexWang
+| Feature | Status | Notes |
+|---|---|---|
+| Server-side labels | ✅ | `labels` on the torrent, stored in the daemon and shared across clients. The original TWC "labels" were browser-local only. |
+| Sequential download | ✅ | Per-torrent toggle (right-click) plus read/write in the detail panel |
+| Bandwidth groups | ✅ | `group-get` / `group-set` wrappers; per-torrent `group` binding shown |
+| Private torrent flag | ✅ | `isPrivate` shown in the detail panel |
+| Per-torrent max peers | ✅ | `maxConnectedPeers` editable |
+| Availability / ETA-idle / percent-complete | ✅ | Requested and available to the UI |
+| Capability detection | ✅ | `transmission.supports()` gates every new feature by `rpc-version`, so older daemons keep working |
+| Reproducible build | ✅ | The original repo shipped `min/` with no build config; `node build.js` now regenerates it |
+
+Everything else — the layout, the PT-oriented tracker grouping, the batch operations — is
+intentionally unchanged. If you are used to TWC, this should feel identical, with a few new
+options in the right places.
+
+## Requirements
+
+* Transmission **2.40+** (RPC >= 14). Transmission **4.x** unlocks the new features listed above.
+* A modern browser. No build step is required to *use* the UI — only to modify it.
+
+## Install
+
+Same as upstream: copy the contents of `src/` into the directory Transmission serves as its web UI.
+For a Synology `transmission` package that is typically:
+
+```sh
+cd /var/packages/transmission/target/share/transmission/
+rm -rf public_html
+cp -r /path/to/src public_html
+chown -R sc-transmission:synocommunity public_html
+```
+
+Or point Transmission at the directory:
+
+```sh
+TRANSMISSION_WEB_HOME=/path/to/src transmission-daemon
+```
+
+## Develop
+
+```sh
+npm install          # installs terser
+node build.js        # regenerate src/tr-web-control/script/min/*.min.js
+node build.js --check  # syntax-check the generated bundles without writing
+
+node test-rpc.js 192.168.1.2:9091   # read-only smoke test against a live daemon
+python3 preview-server.py --port 8901 --upstream 192.168.1.2:9091
+# then open http://127.0.0.1:8901/
+```
+
+`preview-server.py` serves the local `src/` tree and proxies `/rpc` to a real daemon, so you can
+iterate without touching a production install. It bypasses `HTTP_PROXY` on purpose — LAN RPC
+through a proxy returns 502.
+
+Source files live in `src/tr-web-control/script/*.js` (unminified). The page loads the minified
+bundles from `script/min/`, so **any source change requires a rebuild**.
+
+## Credits
+
+* Original project and UI: [栽培者 (ronggang)](https://github.com/ronggang) and contributors — archived 2025-06
+* This fork: [uuunit](https://github.com/uuunit)
+
+Licensed under the MIT license, same as upstream. See [LICENSE](LICENSE).
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).

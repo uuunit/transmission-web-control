@@ -86,7 +86,10 @@
 			"auto-match-data-folder": "Combinar automaticamente o diretório de dados"
 		},
 		"setLabels": "Set User Labels",
-		"copyMagnetLink": "Copy magnetLink to clipboard"
+		"copyMagnetLink": "Copy magnetLink to clipboard",
+		"serverLabels": "Server Labels…",
+		"sequentialOn": "Enable Sequential Download",
+		"sequentialOff": "Disable Sequential Download"
 	},
 	"title": {
 		"left": "Navegação",
@@ -126,7 +129,8 @@
 				"folders": "Pastas"
 			}
 		},
-		"labels": "User Labels"
+		"labels": "User Labels",
+		"serverLabels": "Server Labels"
 	},
 	"statusbar": {
 		"downloadspeed": "Velocidade de descarga:",
@@ -294,6 +298,9 @@
 			"title": "Set User Labels",
 			"available": "Available:",
 			"selected": "Selected:"
+		},
+		"server-labels": {
+			"prompt": "Labels (comma separated, leave empty to clear):"
 		}
 	},
 	"torrent": {
@@ -396,7 +403,13 @@
 				"seedRatioMode": "Proporção de envio:",
 				"seedIdleMode": "O semeamento será interrompido se inativos por:",
 				"doneDate": "Finish Time:",
-				"seedTime": "Seed Time:"
+				"seedTime": "Seed Time:",
+				"labels": "Server Labels",
+				"sequential": "Sequential",
+				"maxConnectedPeers": "Max Peers",
+				"group": "Speed Group",
+				"is-private-yes": "Yes (private)",
+				"is-private-no": "No (public)"
 			},
 			"tip": {
 				"button-allow": "Baixar os ficheiros selecionados",

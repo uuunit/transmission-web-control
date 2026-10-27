@@ -119,6 +119,41 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<!-- Transmission 4.x (RPC 17+) additions -->
+							<tr id="torrent-attribute-tr-server-labels">
+								<td class="title">
+									<span id="torrent-attribute-label-labels"></span>
+								</td>
+								<td colspan="3">
+									<span id="torrent-attribute-value-labels"></span>
+									<a id="torrent-attribute-config-button-editLabels" class="easyui-linkbutton" data-options="iconCls:'iconfont tr-icon-labels',plain:true" href="javascript:void(0);"></a>
+								</td>
+							</tr>
+							<tr id="torrent-attribute-tr-sequential">
+								<td class="title">
+									<input id="sequential_download" type="checkbox" style="width:16px;"/>
+									<label id="torrent-attribute-label-sequential" for="sequential_download"></label>
+								</td>
+								<td>
+									<span id="torrent-attribute-value-isPrivate"></span>
+								</td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr id="torrent-attribute-tr-maxpeers">
+								<td class="title">
+									<span id="torrent-attribute-label-maxConnectedPeers"></span>
+								</td>
+								<td>
+									<input id="maxConnectedPeers" value="" type="text" class="easyui-numberspinner"/>
+								</td>
+								<td class="title">
+									<span id="torrent-attribute-label-group"></span>
+								</td>
+								<td>
+									<span id="torrent-attribute-value-group"></span>
+								</td>
+							</tr>
 						</table>
 					</div>
 					<div data-options="region:'south'" style="padding:2px;height:32px;">
@@ -594,6 +629,17 @@
 			});
 		});
 		
+		// 编辑服务端标签（Transmission 4.0+）
+		var editLabelsBtn = thisLayout.find("#torrent-attribute-config-button-editLabels");
+		if (editLabelsBtn.length) {
+			editLabelsBtn.linkbutton();
+			editLabelsBtn.click(function() {
+				var torrent = transmission.torrents.all[system.currentTorrentId];
+				if (!torrent) return;
+				system.editServerLabels([torrent]);
+			});
+		}
+
 		// 保存参数
 		thisLayout.find("#torrent-attribute-config-button-save").click(function()
 		{

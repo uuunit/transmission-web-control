@@ -1,5 +1,33 @@
 # 更新日志
 ## [English](CHANGELOG-EN.md)
+### 2026.10.27 v1.7.0 (maintained fork)
+
+**Fork 说明**：本版本由 [uuunit](https://github.com/uuunit) 基于原项目 v1.6.1-update1（2020-09）继续维护。
+原项目已于 2025-06-01 归档。本 fork 保留全部原有功能与界面风格，重点补齐 Transmission 4.x / RPC 17+ 支持。
+
+* 新增
+	* 支持 Transmission 4.0+ **服务端标签**（`labels`）：右键「服务端标签…」批量设置，左侧导航新增「服务端标签」分组并可点击筛选；与原有浏览器本地标签不同，服务端标签存于 daemon，多客户端/多设备同步；
+	* 支持**顺序下载**（`sequential_download`）：种子右键菜单一键开关，支持批量；种子详情页亦可查看与修改；
+	* 支持**带宽组**（`group-get` / `group-set`）RPC 封装，种子详情显示所属限速组；
+	* 种子详情「设置」页新增：服务端标签、顺序下载开关、私有种子标识（`isPrivate`）、最大连接数（`maxConnectedPeers`）、所属限速组；
+	* 新增能力检测 `transmission.supports()`：按 `rpc-version` 判断能力，旧版本 daemon 自动隐藏新功能，原有行为不受影响；
+	* 16 种语言补充对应词条。
+
+* 修复
+	* 修复 `serverlabel-` 树节点 id 与本地 `label-` 前缀冲突的问题（`"serverlabel-x"` 含子串 `"label-"`，筛选分支必须前置，否则会走进本地标签逻辑）；
+	* `torrent-get` 补充请求 4.x 字段：`labels`、`sequential_download`、`isPrivate`、`maxConnectedPeers`、`group`、`etaIdle`、`percentComplete`、`availability`；
+	* 实测确认 `sequential_download` 仅接受 snake_case，传 camelCase 无返回，代码按 snake_case 处理。
+
+* 工程
+	* **重建可复现构建**：原仓库 `package.json` / `Gruntfile.js` 均被 `.gitignore` 排除，`min/` 为作者本地压缩后直接提交的产物，无构建脚本。新增 `build.js`（terser，`mangle:false` 以保留跨文件引用的顶层全局 `system` / `transmission` / `public`），`node build.js` 可重建全部 min 产物；
+	* 新增 `test-rpc.js`：对运行中的 daemon 做只读 RPC 冒烟测试（校验 4.x 字段与方法可用性）；
+	* 新增 `preview-server.py`：本地静态预览 + RPC 反向代理，可在不触碰生产环境的前提下调试界面；
+	* 版本号 1.6.1 → 1.7.0，静态资源缓存戳统一更新为 `20261027`。
+
+* 已知限制
+	* 带宽组目前为只读展示 + RPC 方法封装，完整的增删改管理界面待后续版本；
+	* 服务端标签编辑暂用浏览器原生 `prompt`，图形化标签编辑器待后续版本。
+
 ### 2018.03.30 v1.5.1-update2
 * 修复
 	* 修复种子列表字段顺序调整后，格式显示错位的BUG; Fixed #169 #170

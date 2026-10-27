@@ -309,6 +309,91 @@ var transmission = {
 				callback(data);
 		});
 	},
+	// ===== Transmission 4.x additions =====
+	// Whether the connected daemon supports a given RPC feature set.
+	// Detection is by RPC version, which is stable across 4.x releases.
+	supports: function(feature) {
+		var cfg = this.sessionConfig || {};
+		var rpc = parseInt(cfg["rpc-version"] || 0, 10);
+		switch (feature) {
+			// bandwidth groups: RPC 17+
+			case "bandwidthGroups": return rpc >= 17;
+			// labels: RPC 17+ (Transmission 4.0)
+			case "labels": return rpc >= 17;
+			// sequential download: available since RPC 14
+			case "sequentialDownload": return rpc >= 14;
+			default: return false;
+		}
+	},
+	// 获取所有限速组（Transmission 4.0+, RPC 17+）
+	// Response objects use snake_case keys: honor_session_limits / speed_limit_down / ...
+	getBandwidthGroups: function(callback) {
+		this.exec({
+			method: "group-get"
+		}, function(data) {
+			if (callback) {
+				callback(data.result == "success" ? (data.arguments["group"] || []) : null);
+			}
+		});
+	},
+	// 创建/修改限速组（Transmission 4.0+, RPC 17+）
+	// config: { name, honors_session_limits, speed_limit_down, speed_limit_down_enabled,
+	//           speed_limit_up, speed_limit_up_enabled }
+	setBandwidthGroup: function(config, callback) {
+		this.exec({
+			method: "group-set",
+			arguments: config
+		}, function(data) {
+			if (callback) {
+				callback(data.result);
+			}
+		});
+	},
+	// 设置种子标签（Transmission 4.0+, 服务端存储）
+	// ids: number|array, labels: string[]
+	setTorrentLabels: function(ids, labels, callback) {
+		this.exec({
+			method: "torrent-set",
+			arguments: {
+				ids: ids,
+				labels: labels
+			}
+		}, function(data) {
+			if (callback) {
+				callback(data.result);
+			}
+		});
+	},
+	// 设置顺序下载
+	setSequentialDownload: function(ids, enabled, callback) {
+		this.exec({
+			method: "torrent-set",
+			arguments: {
+				ids: ids,
+				"sequential_download": !!enabled
+			}
+		}, function(data) {
+			if (callback) {
+				callback(data.result);
+			}
+		});
+	},
+	// 设置单种最大连接数 / 带宽组 / 带宽优先级
+	setTorrentAdvanced: function(ids, options, callback) {
+		var args = { ids: ids };
+		if (options.maxConnectedPeers !== undefined) args["maxConnectedPeers"] = options.maxConnectedPeers;
+		if (options.group !== undefined) args["group"] = options.group;
+		if (options.bandwidthPriority !== undefined) args["bandwidthPriority"] = options.bandwidthPriority;
+		if (options.honorsSessionLimits !== undefined) args["honorsSessionLimits"] = options.honorsSessionLimits;
+		this.exec({
+			method: "torrent-set",
+			arguments: args
+		}, function(data) {
+			if (callback) {
+				callback(data.result);
+			}
+		});
+	},
 	// 关闭连接？		
 	closeSession: function(callback) {
 		this.exec({

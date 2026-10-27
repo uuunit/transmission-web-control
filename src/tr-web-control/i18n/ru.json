@@ -86,7 +86,10 @@
 			"auto-match-data-folder": "Автосопоставление путей"
 		},
 		"setLabels": "Присвоить метки",
-		"copyMagnetLink": "Скопировать magnet-ссылку в буфер обмена"
+		"copyMagnetLink": "Скопировать magnet-ссылку в буфер обмена",
+		"serverLabels": "Server Labels…",
+		"sequentialOn": "Enable Sequential Download",
+		"sequentialOff": "Disable Sequential Download"
 	},
 	"title": {
 		"left": "Навигация",
@@ -126,7 +129,8 @@
 				"folders": "Папки"
 			}
 		},
-		"labels": "Метки"
+		"labels": "Метки",
+		"serverLabels": "Server Labels"
 	},
 	"statusbar": {
 		"downloadspeed": "Скорость загрузки:",
@@ -312,6 +316,9 @@
 		"import-config": {
 			"title": "Выберите какие настройки импортировать",
 			"invalid-file": "Файл настроек поврежден"
+		},
+		"server-labels": {
+			"prompt": "Labels (comma separated, leave empty to clear):"
 		}
 	},
 	"torrent": {
@@ -430,7 +437,13 @@
 				"seedRatioMode": "Раздача будет остановлена на рейтинге: ",
 				"seedIdleMode": "Раздача будет остановлена если нет активности: ",
 				"doneDate": "Время окончания:",
-				"seedTime": "Время сидирования:"
+				"seedTime": "Время сидирования:",
+				"labels": "Server Labels",
+				"sequential": "Sequential",
+				"maxConnectedPeers": "Max Peers",
+				"group": "Speed Group",
+				"is-private-yes": "Yes (private)",
+				"is-private-no": "No (public)"
 			},
 			"tip": {
 				"button-allow": "Загрузить выбранные файлы",

@@ -86,7 +86,10 @@
 			"auto-match-data-folder": "Automatyczne dopasowanie katalogu"
 		},
 		"setLabels": "Ustaw własne etykiety",
-		"copyMagnetLink": "Skopiuj magnetLink do schowka"
+		"copyMagnetLink": "Skopiuj magnetLink do schowka",
+		"serverLabels": "Server Labels…",
+		"sequentialOn": "Enable Sequential Download",
+		"sequentialOff": "Disable Sequential Download"
 	},
 	"title": {
 		"left": "Nawigacja",
@@ -126,7 +129,8 @@
 				"folders": "Katalogi"
 			}
 		},
-		"labels": "Własne etykiety"
+		"labels": "Własne etykiety",
+		"serverLabels": "Server Labels"
 	},
 	"statusbar": {
 		"downloadspeed": "Prędkość pobierania:",
@@ -312,6 +316,9 @@
 		"import-config": {
 			"title": "Proszę wybrać elementy przeznaczone do zaimportowania",
 			"invalid-file": "Wskazano niewłaściwy plik ustawień"
+		},
+		"server-labels": {
+			"prompt": "Labels (comma separated, leave empty to clear):"
 		}
 	},
 	"torrent": {
@@ -430,7 +437,13 @@
 				"seedRatioMode": "Proporcje do wyseedowania dla tego torrenta:",
 				"seedIdleMode": "Wysyłanie torrenta zostanie zatrzymane, jeżeli nie będzie wysyłany przez (minut):",
 				"doneDate": "Czas zakończenia:",
-				"seedTime": "Czas 'wysiewu':"
+				"seedTime": "Czas 'wysiewu':",
+				"labels": "Server Labels",
+				"sequential": "Sequential",
+				"maxConnectedPeers": "Max Peers",
+				"group": "Speed Group",
+				"is-private-yes": "Yes (private)",
+				"is-private-no": "No (public)"
 			},
 			"tip": {
 				"button-allow": "Pobierz zaznaczone pliki",

@@ -86,7 +86,10 @@
 			"auto-match-data-folder": "Automatically matches data directory"
 		},
 		"setLabels": "Set User Labels",
-		"copyMagnetLink": "Copy magnetLink to clipboard"
+		"copyMagnetLink": "Copy magnetLink to clipboard",
+		"serverLabels": "Server Labels…",
+		"sequentialOn": "Enable Sequential Download",
+		"sequentialOff": "Disable Sequential Download"
 	},
 	"title": {
 		"left": "Navigation",
@@ -126,7 +129,8 @@
 				"folders": "Folders"
 			}
 		},
-		"labels": "User Labels"
+		"labels": "User Labels",
+		"serverLabels": "Server Labels"
 	},
 	"statusbar": {
 		"downloadspeed": "Download speed:",
@@ -312,6 +316,9 @@
 		"import-config": {
 			"title": "Please select the details need to be import",
 			"invalid-file": "Invalid profile"
+		},
+		"server-labels": {
+			"prompt": "Labels (comma separated, leave empty to clear):"
 		}
 	},
 	"torrent": {
@@ -430,7 +437,13 @@
 				"seedRatioMode": "Seed ratio for torrents to use:",
 				"seedIdleMode": "Torrents we're seeding will be stopped if they're idle for this long:",
 				"doneDate": "Finish Time:",
-				"seedTime": "Seed Time:"
+				"seedTime": "Seed Time:",
+				"labels": "Server Labels",
+				"sequential": "Sequential",
+				"maxConnectedPeers": "Max Peers",
+				"group": "Speed Group",
+				"is-private-yes": "Yes (private)",
+				"is-private-no": "No (public)"
 			},
 			"tip": {
 				"button-allow": "Download checked file(s)",

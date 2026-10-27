@@ -86,7 +86,10 @@
 			"auto-match-data-folder": "Авто-зіставлення шляхів"
 		},
 		"setLabels": "Додати користувацьку мітку",
-		"copyMagnetLink": "Копіювати magnet-посилання до буфера обміну"
+		"copyMagnetLink": "Копіювати magnet-посилання до буфера обміну",
+		"serverLabels": "Server Labels…",
+		"sequentialOn": "Enable Sequential Download",
+		"sequentialOff": "Disable Sequential Download"
 	},
 	"title": {
 		"left": "Навігація",
@@ -126,7 +129,8 @@
 				"folders": "Директорії"
 			}
 		},
-		"labels": "Користувацькі мітки"
+		"labels": "Користувацькі мітки",
+		"serverLabels": "Server Labels"
 	},
 	"statusbar": {
 		"downloadspeed": "Швидкість завантаження:",
@@ -311,6 +315,9 @@
 		"import-config": {
 			"title": "Будь ласка виберіть елементи які ви хочете імпортувати",
 			"invalid-file": "Неправильний файл"
+		},
+		"server-labels": {
+			"prompt": "Labels (comma separated, leave empty to clear):"
 		}
 	},
 	"torrent": {
@@ -427,7 +434,13 @@
 				"seedRatioMode": "Роздача буде зупинена на рейтингу: ",
 				"seedIdleMode": "Роздача буде зупинена якщо немає активності: ",
 				"doneDate": "Час завершення:",
-				"seedTime": "Час сідування:"
+				"seedTime": "Час сідування:",
+				"labels": "Server Labels",
+				"sequential": "Sequential",
+				"maxConnectedPeers": "Max Peers",
+				"group": "Speed Group",
+				"is-private-yes": "Yes (private)",
+				"is-private-no": "No (public)"
 			},
 			"tip": {
 				"button-allow": "Завантажити вибрані файли",
