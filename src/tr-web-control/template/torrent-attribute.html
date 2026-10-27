@@ -151,7 +151,8 @@
 									<span id="torrent-attribute-label-group"></span>
 								</td>
 								<td>
-									<span id="torrent-attribute-value-group"></span>
+									<input id="group" class="easyui-combobox" style="width:120px;"/>
+									<a id="torrent-attribute-config-button-manageGroups" class="easyui-linkbutton" data-options="iconCls:'iconfont tr-icon-settings',plain:true" href="javascript:void(0);" style="margin-left:4px;"></a>
 								</td>
 							</tr>
 						</table>
@@ -640,6 +641,15 @@
 			});
 		}
 
+		// 限速组管理入口（Transmission 4.0+）
+		var manageGroupsBtn = thisLayout.find("#torrent-attribute-config-button-manageGroups");
+		if (manageGroupsBtn.length) {
+			manageGroupsBtn.linkbutton();
+			manageGroupsBtn.click(function() {
+				system.openBandwidthGroupsDialog();
+			});
+		}
+
 		// 保存参数
 		thisLayout.find("#torrent-attribute-config-button-save").click(function()
 		{
@@ -674,8 +684,18 @@
 							}
 							break;
 						default:
-							value = ($.isNumeric(input.value)?parseFloat(input.value):input.value);
-							break;
+												if (input.id == "group") {
+													// easyui combobox: value lives in the internal state,
+													// not the input's value attribute.
+													if ($(input).combobox("options").data) {
+														value = $(input).combobox("getValue");
+													} else {
+														continue;
+													}
+												} else {
+													value = ($.isNumeric(input.value)?parseFloat(input.value):input.value);
+												}
+												break;
 					}
 
 					if (value!=torrent[input.id]&&value!=null)

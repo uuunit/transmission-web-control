@@ -1251,11 +1251,162 @@ var system = {
 		renderSuggestions();
 		renderCount();
 	},
-	/**
-	 * Edit server-side labels for the given torrent rows.
-	 * Opens a graphical editor pre-filled with the union of their labels
-	 * (Transmission 4.0+; the labels live on the daemon).
-	 */
+	// ---- Bandwidth groups (Transmission 4.0+, RPC 17+) ----
+	// Load the group list and cache it (also used by the detail panel combo).
+	refreshServerGroups: function(callback) {
+		transmission.getBandwidthGroups(function(groups) {
+			system.serverGroups = groups || [];
+			if (callback) callback(system.serverGroups);
+		});
+	},
+	// Open the bandwidth-group manager dialog.
+	openBandwidthGroupsDialog: function() {
+		var dlg = system.lang.dialog["bandwidth-groups"] || {};
+		system.openDialogFromTemplate({
+			id: "dialog-bandwidth-groups",
+			options: {
+				title: dlg.title || "Bandwidth Groups",
+				width: 620,
+				height: 430
+			}
+		});
+		var attempts = 0;
+		var timer = setInterval(function() {
+			var $dlg = $("#dialog-bandwidth-groups");
+			if ($dlg.find("#bg-group-list").length) {
+				clearInterval(timer);
+				system.initBandwidthGroupsDialog($dlg);
+			} else if (++attempts > 40) {
+				clearInterval(timer);
+			}
+		}, 100);
+	},
+	// Controller for the bandwidth-group manager dialog.
+	initBandwidthGroupsDialog: function($dlg) {
+		if (!$dlg || !$dlg.length) return;
+		if ($dlg.data("bg-initialised")) return;
+		$dlg.data("bg-initialised", true);
+
+		var dlg = system.lang.dialog["bandwidth-groups"] || {};
+		var state = { list: [], editing: null };
+
+		function renderList(selectName) {
+			var box = $dlg.find("#bg-group-list").empty();
+			if (!state.list.length) {
+				box.html("<div style='padding:8px;color:#999;'>" + (dlg["empty"] || "-") + "</div>");
+				return;
+			}
+			for (var i = 0; i < state.list.length; i++) {
+				(function(g) {
+					var el = $("<div/>").attr("class", "bg-group-item").html(g.name).css({
+						"padding": "6px 10px", "cursor": "pointer",
+						"border-bottom": "1px solid #f0f0f0", "font-size": "13px"
+					});
+					el.hover(
+						function() { $(this).css("background-color", "#f5f7fa"); },
+						function() { $(this).css("background-color", $(this).hasClass("bg-selected") ? "#e0e7ff" : "transparent"); }
+					);
+					el.click(function() {
+						$dlg.find(".bg-group-item").removeClass("bg-selected").css("background-color", "transparent");
+						el.addClass("bg-selected").css("background-color", "#e0e7ff");
+						selectGroup(g);
+					});
+					if (selectName && g.name == selectName) {
+						el.addClass("bg-selected").css("background-color", "#e0e7ff");
+					}
+					box.append(el);
+				})(state.list[i]);
+			}
+		}
+
+		function selectGroup(g) {
+			state.editing = g.name;
+			$dlg.find("#bg-name").textbox("setValue", g.name);
+			// RPC returns mixed-case keys: honorsSessionLimits (camelCase),
+			// speed-limit-down / speed-limit-down-enabled (kebab-case).
+			// The request side uses snake_case; the response side does not.
+			$dlg.find("#bg-down-enabled").prop("checked", !!g["speed-limit-down-enabled"]);
+			$dlg.find("#bg-speed-limit-down").numberspinner("setValue", g["speed-limit-down"] || 0);
+			$dlg.find("#bg-up-enabled").prop("checked", !!g["speed-limit-up-enabled"]);
+			$dlg.find("#bg-speed-limit-up").numberspinner("setValue", g["speed-limit-up"] || 0);
+			$dlg.find("#bg-honors").prop("checked", !!g.honorsSessionLimits);
+			$dlg.find("#bg-save-status").text("");
+		}
+
+		function newGroup() {
+			state.editing = null;
+			$dlg.find("#bg-name").textbox("setValue", "");
+			$dlg.find("#bg-down-enabled").prop("checked", false);
+			$dlg.find("#bg-speed-limit-down").numberspinner("setValue", 0);
+			$dlg.find("#bg-up-enabled").prop("checked", false);
+			$dlg.find("#bg-speed-limit-up").numberspinner("setValue", 0);
+			$dlg.find("#bg-honors").prop("checked", false);
+			$dlg.find(".bg-group-item").removeClass("bg-selected").css("background-color", "transparent");
+			$dlg.find("#bg-save-status").text(dlg["new-hint"] || "");
+			$dlg.find("#bg-name").textbox("textbox").focus();
+		}
+
+		function save() {
+			var name = ($dlg.find("#bg-name").textbox("getValue") || "").replace(/^\s+|\s+$/g, "");
+			if (!name) {
+				$dlg.find("#bg-save-status").text(dlg["name-required"] || "name required");
+				return;
+			}
+			var cfg = {
+				"name": name,
+				"speed_limit_down": parseInt($dlg.find("#bg-speed-limit-down").numberspinner("getValue"), 10) || 0,
+				"speed_limit_down_enabled": !!$dlg.find("#bg-down-enabled").is(":checked"),
+				"speed_limit_up": parseInt($dlg.find("#bg-speed-limit-up").numberspinner("getValue"), 10) || 0,
+				"speed_limit_up_enabled": !!$dlg.find("#bg-up-enabled").is(":checked"),
+				"honors_session_limits": !!$dlg.find("#bg-honors").is(":checked")
+			};
+			$dlg.find("#bg-save-status").text(dlg["saving"] || "saving...");
+			transmission.setBandwidthGroup(cfg, function(result) {
+				if (result != "success") {
+					$dlg.find("#bg-save-status").text(result);
+					return;
+				}
+				// Reload and keep the saved group selected.
+				transmission.getBandwidthGroups(function(groups) {
+					state.list = groups || [];
+					system.serverGroups = state.list;
+					renderList(name);
+					state.editing = name;
+					$dlg.find("#bg-save-status").text(dlg["saved"] || "saved");
+				});
+			});
+		}
+
+		function refresh() {
+			transmission.getBandwidthGroups(function(groups) {
+				state.list = groups || [];
+				system.serverGroups = state.list;
+				renderList();
+			});
+		}
+
+		// Wire up the form (controller lives here; inline scripts in the
+		// template never run because easyui injects dialog content via innerHTML).
+		system.resetLangText($dlg);
+		var P = system.lang.dialog["public"] || {};
+		$dlg.find("#bg-button-new").linkbutton({ text: P["button-addnew"] || "New" });
+		$dlg.find("#bg-button-refresh").linkbutton({ text: P["button-reload"] || "Reload" });
+		$dlg.find("#bg-button-save").linkbutton({ text: P["button-save"] || "Save" });
+
+		$dlg.find("#bg-button-new").click(newGroup);
+		$dlg.find("#bg-button-refresh").click(refresh);
+		$dlg.find("#bg-button-save").click(save);
+
+		// captions that resetLangText cannot reach (td.title etc. carry no system-lang)
+		$dlg.find("#bg-caption-name").text(dlg["name"] || "Name");
+		$dlg.find("#bg-caption-down").text(dlg["down"] || "Download");
+		$dlg.find("#bg-caption-up").text(dlg["up"] || "Upload");
+		$dlg.find("#bg-caption-honors").text(dlg["honors"] || "Honor session limits");
+		$dlg.find("#bg-unit-down").text(dlg["unit"] || "KB/s");
+		$dlg.find("#bg-unit-up").text(dlg["unit"] || "KB/s");
+
+		refresh();
+	},
 	editServerLabels: function(rows) {
 		if (!rows || !rows.length) return;
 
@@ -1819,6 +1970,11 @@ var system = {
 			system.serverConfig = result;
 			// Expose session config on the RPC object so capability detection works
 			transmission.sessionConfig = result;
+			// Pre-load the bandwidth-group list once we know the RPC version
+			// (only populated on Transmission 4.x; harmless elsewhere).
+			if (transmission.supports("bandwidthGroups")) {
+				system.refreshServerGroups();
+			}
 			// Version Information
 			$("#status_version").html("Transmission " + system.lang.statusbar.version + result["version"] + ", RPC: " + result["rpc-version"] +
 				", WEB Control: " + system.version + "(" + system.codeupdate + ")");
@@ -3217,6 +3373,27 @@ var system = {
 			$("<span class='user-label'/>").html(labels[i]).appendTo(box);
 		}
 	},
+	/**
+	 * Render the bandwidth-group selector in the detail panel.
+	 */
+	renderAttributeGroup: function(value) {
+		var combo = system.panel.attribute.find("#group");
+		if (!combo.length) return;
+		if (!combo.data("bg-combo-init")) {
+			combo.data("bg-combo-init", true);
+			combo.combobox({
+				editable: false,
+				valueField: "name",
+				textField: "name",
+				data: system.serverGroups || [],
+				panelHeight: "auto"
+			});
+		}
+		combo.combobox("loadData", system.serverGroups || []);
+		setTimeout(function() {
+			combo.combobox("setValue", value || "");
+		}, 0);
+	},
 	// Fill torrent parameters
 	fillTorrentConfig: function (torrent) {
 		if (system.panel.attribute.find("#torrent-attribute-tabs").data("selectedIndex") != 4) {
@@ -3271,9 +3448,7 @@ var system = {
 						break;
 
 					case "group":
-						system.panel.attribute.find("#torrent-attribute-value-group").html(
-							value || "-"
-						);
+						system.renderAttributeGroup(value);
 						break;
 
 					default:

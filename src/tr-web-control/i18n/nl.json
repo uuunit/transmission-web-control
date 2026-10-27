@@ -308,6 +308,19 @@
 			"empty": "(none — will clear all labels)",
 			"no-suggestions": "(no labels in use yet, type one above)",
 			"count": "%s selected"
+		},
+		"bandwidth-groups": {
+			"title": "Bandwidth Groups",
+			"empty": "No groups yet — click New to create one",
+			"saving": "saving…",
+			"saved": "saved",
+			"name-required": "name required",
+			"new-hint": "type a name and Save to create",
+			"name": "Name",
+			"down": "Download",
+			"up": "Upload",
+			"honors": "Honor session limits",
+			"unit": "KB/s"
 		}
 	},
 	"torrent": {

@@ -311,6 +311,19 @@
 			"empty": "（無，將清除所有標籤）",
 			"no-suggestions": "（暫無已用標籤，請在上方輸入）",
 			"count": "已選 %s 個"
+		},
+		"bandwidth-groups": {
+			"title": "限速組管理",
+			"empty": "尚未有限速組，點擊「新增」建立",
+			"saving": "儲存中…",
+			"saved": "已儲存",
+			"name-required": "請填寫組名",
+			"new-hint": "填寫後點儲存即可新建",
+			"name": "名稱",
+			"down": "下行限速",
+			"up": "上行限速",
+			"honors": "遵循會話全域限速",
+			"unit": "KB/s"
 		}
 	},
 	"torrent": {

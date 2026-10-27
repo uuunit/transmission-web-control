@@ -1,0 +1,46 @@
+<div class="easyui-layout" data-options="fit:true" style="width:100%;height:100%;">
+	<div data-options="region:'west',split:true" style="width:230px;border-right:1px solid #ccc;">
+		<div style="padding:6px;border-bottom:1px solid #ccc;">
+			<a id="bg-button-new" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" href="javascript:void(0);"></a>
+			<a id="bg-button-refresh" class="easyui-linkbutton" data-options="iconCls:'icon-reload',plain:true" href="javascript:void(0);"></a>
+		</div>
+		<div id="bg-group-list" style="overflow:auto;"></div>
+	</div>
+	<div data-options="region:'center'" style="padding:8px;">
+		<form id="bg-form">
+			<table style="width:100%;">
+				<tr>
+					<td class="title" id="bg-caption-name" style="width:110px;"></td>
+					<td><input id="bg-name" class="easyui-textbox" style="width:180px;"/></td>
+				</tr>
+				<tr>
+					<td class="title" id="bg-caption-down"></td>
+					<td>
+						<input id="bg-down-enabled" type="checkbox" style="width:16px;"/>
+						<input id="bg-speed-limit-down" class="easyui-numberspinner" style="width:80px;"/> <span id="bg-unit-down"></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="title" id="bg-caption-up"></td>
+					<td>
+						<input id="bg-up-enabled" type="checkbox" style="width:16px;"/>
+						<input id="bg-speed-limit-up" class="easyui-numberspinner" style="width:80px;"/> <span id="bg-unit-up"></span>
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<input id="bg-honors" type="checkbox" style="width:16px;"/> <label id="bg-caption-honors" for="bg-honors"></label>
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td style="padding-top:10px;">
+						<a id="bg-button-save" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" href="javascript:void(0);"></a>
+						<span id="bg-save-status" style="margin-left:10px;color:#999;"></span>
+					</td>
+				</tr>
+			</table>
+		</form>
+	</div>
+</div>

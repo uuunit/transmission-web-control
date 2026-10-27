@@ -326,6 +326,19 @@
 			"empty": "（无，将清除所有标签）",
 			"no-suggestions": "（暂无已用标签，请在上方输入）",
 			"count": "已选 %s 个"
+		},
+		"bandwidth-groups": {
+			"title": "限速组管理",
+			"empty": "还没有限速组，点击「新增」创建",
+			"saving": "保存中…",
+			"saved": "已保存",
+			"name-required": "请填写组名",
+			"new-hint": "填写后点保存即可新建",
+			"name": "名称",
+			"down": "下行限速",
+			"up": "上行限速",
+			"honors": "遵循会话全局限速",
+			"unit": "KB/s"
 		}
 	},
 	"torrent": {
