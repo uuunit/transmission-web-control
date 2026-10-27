@@ -9,6 +9,8 @@ PT-oriented workflow intact, and brings the codebase up to Transmission 4.x / RP
 	* Server-side labels (Transmission 4.0+): right-click "Server Labels…" to batch-set, a new "Server Labels" group in the left nav with click-to-filter. Unlike the pre-existing browser-local labels (localStorage), these live on the daemon and sync across clients. A graphical editor replaces the earlier prompt-based UI.
 	* Sequential download (sequential_download): toggle in the torrent context menu (batch) and in the detail panel.
 	* Bandwidth groups: a manager dialog (group-get / group-set) covering create/edit of speed limits + honors-session-limits, plus a combobox in the torrent detail panel.
+	* Context-menu "Bandwidth Group" submenu: batch-assign a group to all checked torrents (with "None" to clear and a "Manage Groups…" entry).
+	* Toast notification when "Edit Server Labels" is clicked with no torrent selected (instead of silently doing nothing).
 	* Detail panel "Settings" tab gains: server labels, sequential download, isPrivate, maxConnectedPeers, and the bandwidth-group combo.
 	* Capability detection via transmission.supports(), gated on rpc-version so older daemons keep their existing behaviour.
 	* i18n entries for all 16 languages.
@@ -26,7 +28,8 @@ PT-oriented workflow intact, and brings the codebase up to Transmission 4.x / RP
 	* Version 1.6.1 -> 1.7.0, cache busters unified to 20261027.
 
 * Known limitation
-	* Transmission exposes no group-remove RPC, so bandwidth groups cannot be deleted through the UI once created. This matches the daemon's own behaviour.
+	* New features are gated on rpc-version and need Transmission 4.0 (RPC 17) or newer; older daemons simply don't show them.
+	* Transmission exposes no group-remove RPC, so bandwidth groups cannot be deleted through the UI once created. Removing one requires stopping the daemon and editing settings.json.
 
 ### 2018.03.30 v1.5.1-update2
 * Fixed
