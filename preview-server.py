@@ -177,11 +177,13 @@ def selftest():
 def main():
     global UPSTREAM, PORT
     ap = argparse.ArgumentParser()
+    ap.add_argument("--host", default="0.0.0.0",
+                    help="bind address (default 0.0.0.0, LAN-reachable)")
     ap.add_argument("--port", type=int, default=PORT)
     ap.add_argument("--upstream", default=UPSTREAM)
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args()
-    PORT, UPSTREAM = args.port, args.upstream
+    PORT, UPSTREAM, HOST = args.port, args.upstream, args.host
 
     if not os.path.isdir(ROOT):
         sys.exit("src/ not found next to this script: %s" % ROOT)
@@ -192,10 +194,10 @@ def main():
 
     print("Serving : %s" % ROOT)
     print("Proxying: /transmission/rpc -> http://%s/transmission/rpc" % UPSTREAM)
-    print("Open    : http://127.0.0.1:%d/" % PORT)
+    print("Binding : %s:%d" % (HOST, PORT))
     print("Ctrl-C to stop.\n")
 
-    with Server(("127.0.0.1", PORT), Handler) as httpd:
+    with Server((HOST, PORT), Handler) as httpd:
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
