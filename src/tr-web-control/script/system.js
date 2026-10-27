@@ -959,6 +959,10 @@ var system = {
 				if (transmission.supports("sequentialDownload")) {
 					menus.push("sequentialDownload");
 				}
+				// Transmission 4.x (RPC 17+): bandwidth groups (批量分配限速组)
+				if (transmission.supports("bandwidthGroups")) {
+					menus.push("bandwidthGroup");
+				}
 				var toolbar = this.panel.toolbar;
 				for (var item in menus) {
 					var key = menus[item];
@@ -1090,6 +1094,58 @@ var system = {
 					onclick: function() {
 						system.setSequentialDownload(rows, !allOn);
 					}
+				};
+			case "bandwidthGroup":
+				// Transmission 4.x: 批量分配限速组（子菜单列出所有组 + 无 + 管理入口）
+				var groups = system.serverGroups || [];
+				var sub = [];
+				// "无"（清除限速组）
+				sub.push({
+					text: system.lang.menus.noGroup || "None",
+					iconCls: "iconfont tr-icon-label",
+					onclick: function() {
+						var rs = system.checkedRows || [];
+						var ids = [];
+						for (var i = 0; i < rs.length; i++) ids.push(rs[i].id);
+						if (!ids.length) return;
+						transmission.setTorrentGroup(ids, "", function(result) {
+							if (result == "success") system.control.torrentlist.datagrid("reload");
+						});
+					}
+				});
+				// 每个限速组
+				for (var gi = 0; gi < groups.length; gi++) {
+					(function(gname) {
+						sub.push({
+							text: gname,
+							iconCls: "iconfont tr-icon-label",
+							onclick: function() {
+								var rs = system.checkedRows || [];
+								var ids = [];
+								for (var i = 0; i < rs.length; i++) ids.push(rs[i].id);
+								if (!ids.length) return;
+								transmission.setTorrentGroup(ids, gname, function(result) {
+									if (result == "success") system.control.torrentlist.datagrid("reload");
+								});
+							}
+						});
+					})(groups[gi].name);
+				}
+				// 分隔线 + 管理入口
+				sub.push({ text: "-" });
+				sub.push({
+					text: system.lang.menus.manageGroups || "Manage Groups...",
+					iconCls: "iconfont tr-icon-settings",
+					onclick: function() {
+						system.openBandwidthGroupsDialog();
+					}
+				});
+				return {
+					id: "bandwidthGroup",
+					text: system.lang.menus.bandwidthGroup || "Bandwidth Group",
+					iconCls: "iconfont tr-icon-settings",
+					disabled: this.checkedRows.length == 0,
+					submenu: sub
 				};
 		}
 	},

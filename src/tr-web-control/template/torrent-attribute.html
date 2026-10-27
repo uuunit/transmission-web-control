@@ -636,7 +636,16 @@
 			editLabelsBtn.linkbutton();
 			editLabelsBtn.click(function() {
 				var torrent = transmission.torrents.all[system.currentTorrentId];
-				if (!torrent) return;
+				if (!torrent) {
+					$.messager.show({
+						title: (system.lang.system && system.lang.system.title) || "Tip",
+						msg: system.lang.tip && system.lang.tip.selectTorrentFirst || "Please select a torrent first",
+						showType: "slide",
+						timeout: 3000,
+						style: {right:"",bottom:""}
+					});
+					return;
+				}
 				system.editServerLabels([torrent]);
 			});
 		}
