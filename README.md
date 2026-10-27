@@ -67,7 +67,7 @@ node build.js --check  # syntax-check the generated bundles without writing
 
 node test-rpc.js 192.168.1.2:9091   # read-only smoke test against a live daemon
 python3 preview-server.py --port 8901 --upstream 192.168.1.2:9091
-# then open http://127.0.0.1:8901/
+# then open http://127.0.0.1:8901/   (binds 0.0.0.0 by default; pass --host 127.0.0.1 to restrict)
 ```
 
 `preview-server.py` serves the local `src/` tree and proxies `/rpc` to a real daemon, so you can
@@ -76,6 +76,22 @@ through a proxy returns 502.
 
 Source files live in `src/tr-web-control/script/*.js` (unminified). The page loads the minified
 bundles from `script/min/`, so **any source change requires a rebuild**.
+
+## Deploy to Synology
+
+`deploy-twcv17.sh` is a small helper for the NAS itself (run it there, over SSH, as root):
+
+```sh
+sudo ./deploy-twcv17.sh status     # detect the served web dir + show current versions
+sudo ./deploy-twcv17.sh backup     # timestamped snapshot next to the web dir
+sudo ./deploy-twcv17.sh deploy     # snapshot, download this fork from GitHub, replace, fix ownership
+sudo ./deploy-twcv17.sh rollback   # restore the newest snapshot (asks for confirmation)
+sudo ./deploy-twcv17.sh list       # list snapshots
+```
+
+`deploy` always snapshots first and aborts if the download or extraction fails, so a bad deploy
+never destroys the working install. It touches **only** the web directory — no `settings.json`,
+no daemon config, no network settings.
 
 ## Credits
 
